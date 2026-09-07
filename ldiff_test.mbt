@@ -126,7 +126,7 @@ test "complete page demo" (t : @test.Test) {
       "  let mut sum = 0", "  for item in items {", "    sum += item.price * item.count + tax",
       "  }", "  sum // final", "}",
     ][:]
-  let body = StringBuilder::new()
+  let body = StringBuilder()
   body <+ "<h3>Split view</h3>\n"
   body <+ "\{@ldiff.side_by_side_html(old~, new~)}"
   body <+ "<h3>Unified view</h3>\n"
