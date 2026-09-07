@@ -17,7 +17,7 @@
 
 ///|
 fn esc(s : String) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   for c in s {
     match c {
       '&' => buf <+ "&amp;"
@@ -33,10 +33,10 @@ fn esc(s : String) -> String {
 /// Render one aligned pair's ops as (left row, right row) HTML, merging
 /// adjacent highlighted tokens into single runs.
 fn pair_row_html(ops : Array[Op]) -> (String, String) {
-  let l = StringBuilder::new()
-  let r = StringBuilder::new()
-  let lrun = StringBuilder::new()
-  let rrun = StringBuilder::new()
+  let l = StringBuilder()
+  let r = StringBuilder()
+  let lrun = StringBuilder()
+  let rrun = StringBuilder()
   fn flushes() {
     if !lrun.is_empty() {
       l <+ "<b class=\"wd\">\{lrun.to_string()}</b>"
@@ -155,7 +155,7 @@ pub fn side_by_side_html(
   new~ : ArrayView[String],
   context? : Int = 3,
 ) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   buf <+ "<table class=\"split\">\n"
   for h in @diff.Diff(old~, new~).group(context~) {
     buf <+
@@ -165,10 +165,11 @@ pub fn side_by_side_html(
     let n = h.new_view()
     let mut i = 0
     while i < edits.length() {
-      match edits[i] {
-        Delete(old_index~, old_len~, ..) if i + 1 < edits.length() &&
-          edits[i + 1] is Insert(..) => {
-          guard edits[i + 1] is Insert(new_index~, new_len~, ..)
+      match (edits[i], edits.get(i + 1)) {
+        (
+          Delete(old_index~, old_len~, ..),
+          Some(Insert(new_index~, new_len~, ..)),
+        ) => {
           split_replacement(
             buf,
             o.view(start=old_index, end=old_index + old_len),
@@ -176,21 +177,21 @@ pub fn side_by_side_html(
           )
           i += 2
         }
-        Equal(old_index~, len~, ..) => {
+        (Equal(old_index~, len~, ..), _) => {
           for l in o.view(start=old_index, end=old_index + len) {
             buf <+
               "<tr><td class=\"ctx\">\{esc(l)}</td><td class=\"ctx\">\{esc(l)}</td></tr>\n"
           }
           i += 1
         }
-        Delete(old_index~, old_len~, ..) => {
+        (Delete(old_index~, old_len~, ..), _) => {
           for l in o.view(start=old_index, end=old_index + old_len) {
             buf <+
               "<tr><td class=\"del\">\{esc(l)}</td><td class=\"empty\"></td></tr>\n"
           }
           i += 1
         }
-        Insert(new_index~, new_len~, ..) => {
+        (Insert(new_index~, new_len~, ..), _) => {
           for l in n.view(start=new_index, end=new_index + new_len) {
             buf <+
               "<tr><td class=\"empty\"></td><td class=\"add\">\{esc(l)}</td></tr>\n"
@@ -208,7 +209,7 @@ pub fn side_by_side_html(
 /// Wrap rendered diff HTML in a complete standalone page with default
 /// styling (light red/green rows, deeper word-level highlights).
 pub fn html_page(title~ : String, body : String) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   buf <+ "<!DOCTYPE html>\n<html><head><meta charset=\"utf-8\">"
   buf <+ "<title>\{esc(title)}</title><style>\n"
   buf <+ "body { font-family: monospace; }\n"
@@ -239,7 +240,7 @@ pub fn unified_html(
   new~ : ArrayView[String],
   context? : Int = 3,
 ) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   fn line(cls : String, prefix : String, body : String) {
     buf <+ "<span class=\"\{cls}\">\{prefix}\{body}</span>\n"
   }
@@ -252,10 +253,11 @@ pub fn unified_html(
     let n = h.new_view()
     let mut i = 0
     while i < edits.length() {
-      match edits[i] {
-        Delete(old_index~, old_len~, ..) if i + 1 < edits.length() &&
-          edits[i + 1] is Insert(..) => {
-          guard edits[i + 1] is Insert(new_index~, new_len~, ..)
+      match (edits[i], edits.get(i + 1)) {
+        (
+          Delete(old_index~, old_len~, ..),
+          Some(Insert(new_index~, new_len~, ..)),
+        ) => {
           let old_lines = o.view(start=old_index, end=old_index + old_len)
           let new_lines = n.view(start=new_index, end=new_index + new_len)
           let mut fallback = old_lines.length() > 64 || new_lines.length() > 64
@@ -325,19 +327,19 @@ pub fn unified_html(
           }
           i += 2
         }
-        Equal(old_index~, len~, ..) => {
+        (Equal(old_index~, len~, ..), _) => {
           for l in o.view(start=old_index, end=old_index + len) {
             line("ctx", " ", esc(l))
           }
           i += 1
         }
-        Delete(old_index~, old_len~, ..) => {
+        (Delete(old_index~, old_len~, ..), _) => {
           for l in o.view(start=old_index, end=old_index + old_len) {
             line("del", "-", esc(l))
           }
           i += 1
         }
-        Insert(new_index~, new_len~, ..) => {
+        (Insert(new_index~, new_len~, ..), _) => {
           for l in n.view(start=new_index, end=new_index + new_len) {
             line("add", "+", esc(l))
           }

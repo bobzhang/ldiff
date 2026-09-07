@@ -3,7 +3,7 @@ name = "bobzhang/ldiff"
 version = "0.1.1"
 
 import {
-  "moonbitlang/lexer@0.3.11",
+  "moonbitlang/lexer@0.3.16",
 }
 
 readme = "README.md"

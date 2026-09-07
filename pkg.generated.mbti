@@ -33,8 +33,9 @@ pub(all) enum TokKind {
   Space
   Marker
 } derive(Eq)
+pub fn TokKind::equal(Self, Self) -> Bool
+pub fn TokKind::not_equal(Self, Self) -> Bool
 
 // Type aliases
 
 // Traits
-

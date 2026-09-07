@@ -28,6 +28,11 @@ pub(all) enum TokKind {
 } derive(Eq)
 
 ///|
+/// Keep `==` / `!=` available as dot-callable methods on `TokKind` now that
+/// implicit promotion of `impl Eq` methods is deprecated.
+pub extend TokKind with Eq::{not_equal, equal}
+
+///|
 /// One diffable token: its weight class and its exact source text.
 /// Concatenating the `text` of `tokenize_line`'s result reproduces the line.
 pub struct Tok {
@@ -64,25 +69,14 @@ pub fn weight(k : TokKind) -> Int {
 /// and comment spacing are weightless `Filler` — shared boilerplate must not
 /// make unrelated comments look similar.
 fn push_comment_tokens(toks : Array[Tok], body : String) -> Unit {
-  let mut rest = body.view()
-  while rest is [_, ..] {
-    rest = lexscan rest with longest {
-      (re"^//+" as t, after=next) => {
-        toks.push({ kind: Filler, text: t.to_owned() })
-        next
-      }
-      (re"^[ \t]+" as t, after=next) => {
-        toks.push({ kind: Filler, text: t.to_owned() })
-        next
-      }
-      (re"^[A-Za-z0-9_]+" as t, after=next) => {
-        toks.push({ kind: Comment, text: t.to_owned() })
-        next
-      }
-      (re"^." as t, after=next) => {
-        toks.push({ kind: Comment, text: t.to_string() })
-        next
-      }
+  let scanner = @lexbuf.StringScanner::{ data: body.view(), cursor: 0, }
+  while scanner.cursor < scanner.data.length() {
+    lexscan scanner with longest {
+      re"^//+" as t => toks.push({ kind: Filler, text: t.to_owned(), })
+      re"^[ \t]+" as t => toks.push({ kind: Filler, text: t.to_owned(), })
+      re"^[A-Za-z0-9_]+" as t =>
+        toks.push({ kind: Comment, text: t.to_owned(), })
+      re"^." as t => toks.push({ kind: Comment, text: t.to_string(), })
       _ => abort("unreachable")
     }
   }
@@ -156,17 +150,20 @@ pub fn tokenize_line(line : String) -> Array[Tok] {
     match tok {
       COMMENT(_) =>
         if text is ['/', '/', '/', '|', ..] {
-          toks.push({ kind: Marker, text: "///|" })
+          toks.push({ kind: Marker, text: "///|", })
           push_comment_tokens(toks, text.view(start_offset=4).to_owned())
         } else {
           push_comment_tokens(toks, text)
         }
-      _ => toks.push({ kind: classify(tok, text), text })
+      _ => toks.push({ kind: classify(tok, text), text, })
     }
     prev_end = ep.cnum
   }
   if prev_end < line.length() {
-    toks.push({ kind: Space, text: line.view(start_offset=prev_end).to_owned() })
+    toks.push({
+      kind: Space,
+      text: line.view(start_offset=prev_end).to_owned(),
+    })
   }
   toks
 }

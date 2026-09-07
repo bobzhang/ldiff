@@ -48,8 +48,8 @@ test "pair_ops reconstruction property" {
       ("", "only new"),
     ] {
     let (oa, ob) = pair
-    let left = StringBuilder::new()
-    let right = StringBuilder::new()
+    let left = StringBuilder()
+    let right = StringBuilder()
     for op in pair_ops(tokenize_line(oa), tokenize_line(ob)) {
       match op {
         OEq(t) => {

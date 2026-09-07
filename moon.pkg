@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/diff",
+  "moonbitlang/core/lexbuf",
   "moonbitlang/lexer",
   "moonbitlang/lexer/tokens",
 }
