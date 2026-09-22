@@ -172,27 +172,27 @@ pub fn side_by_side_html(
         ) => {
           split_replacement(
             buf,
-            o.view(start=old_index, end=old_index + old_len),
-            n.view(start=new_index, end=new_index + new_len),
+            o.exact_view(start=old_index, end=old_index + old_len),
+            n.exact_view(start=new_index, end=new_index + new_len),
           )
           i += 2
         }
         (Equal(old_index~, len~, ..), _) => {
-          for l in o.view(start=old_index, end=old_index + len) {
+          for l in o.exact_view(start=old_index, end=old_index + len) {
             buf <+
               "<tr><td class=\"ctx\">\{esc(l)}</td><td class=\"ctx\">\{esc(l)}</td></tr>\n"
           }
           i += 1
         }
         (Delete(old_index~, old_len~, ..), _) => {
-          for l in o.view(start=old_index, end=old_index + old_len) {
+          for l in o.exact_view(start=old_index, end=old_index + old_len) {
             buf <+
               "<tr><td class=\"del\">\{esc(l)}</td><td class=\"empty\"></td></tr>\n"
           }
           i += 1
         }
         (Insert(new_index~, new_len~, ..), _) => {
-          for l in n.view(start=new_index, end=new_index + new_len) {
+          for l in n.exact_view(start=new_index, end=new_index + new_len) {
             buf <+
               "<tr><td class=\"empty\"></td><td class=\"add\">\{esc(l)}</td></tr>\n"
           }
@@ -258,8 +258,8 @@ pub fn unified_html(
           Delete(old_index~, old_len~, ..),
           Some(Insert(new_index~, new_len~, ..)),
         ) => {
-          let old_lines = o.view(start=old_index, end=old_index + old_len)
-          let new_lines = n.view(start=new_index, end=new_index + new_len)
+          let old_lines = o.exact_view(start=old_index, end=old_index + old_len)
+          let new_lines = n.exact_view(start=new_index, end=new_index + new_len)
           let mut fallback = old_lines.length() > 64 || new_lines.length() > 64
           let olds : Array[Array[Tok]] = []
           let news : Array[Array[Tok]] = []
@@ -328,19 +328,19 @@ pub fn unified_html(
           i += 2
         }
         (Equal(old_index~, len~, ..), _) => {
-          for l in o.view(start=old_index, end=old_index + len) {
+          for l in o.exact_view(start=old_index, end=old_index + len) {
             line("ctx", " ", esc(l))
           }
           i += 1
         }
         (Delete(old_index~, old_len~, ..), _) => {
-          for l in o.view(start=old_index, end=old_index + old_len) {
+          for l in o.exact_view(start=old_index, end=old_index + old_len) {
             line("del", "-", esc(l))
           }
           i += 1
         }
         (Insert(new_index~, new_len~, ..), _) => {
-          for l in n.view(start=new_index, end=new_index + new_len) {
+          for l in n.exact_view(start=new_index, end=new_index + new_len) {
             line("add", "+", esc(l))
           }
           i += 1
