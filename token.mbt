@@ -53,7 +53,7 @@ pub fn Tok::text(self : Tok) -> String {
 ///|
 /// The alignment weight of a token class (integer; all scoring is integer so
 /// results are bit-identical on every backend).
-pub fn weight(k : TokKind) -> Int {
+pub fn weight(k : TokKind) -> Int32 {
   match k {
     Word | Str | Marker => 20
     Punct => 6

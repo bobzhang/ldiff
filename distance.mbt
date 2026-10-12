@@ -22,7 +22,7 @@
 /// delete+insert (2x) so renames align, but expensive enough that two lines
 /// with nothing in common score ~250 permille, under the pairing threshold.
 /// Cross-kind substitution is not offered; it decomposes into delete+insert.
-fn subst_cost(a : Tok, b : Tok) -> Int? {
+fn subst_cost(a : Tok, b : Tok) -> Int32? {
   if a.kind == b.kind {
     if a.text == b.text {
       Some(0)
@@ -35,7 +35,7 @@ fn subst_cost(a : Tok, b : Tok) -> Int? {
 }
 
 ///|
-fn tok_mass(ts : ArrayView[Tok]) -> Int {
+fn tok_mass(ts : ArrayView[Tok]) -> Int32 {
   let mut m = 0
   for t in ts {
     m += weight(t.kind)
@@ -45,7 +45,7 @@ fn tok_mass(ts : ArrayView[Tok]) -> Int {
 
 ///|
 /// Weighted token edit distance (scoring only: rolling rows).
-fn wdist(a : ArrayView[Tok], b : ArrayView[Tok]) -> Int {
+fn wdist(a : ArrayView[Tok], b : ArrayView[Tok]) -> Int32 {
   let n = b.length()
   let mut prev = Array::make(n + 1, 0)
   let mut acc = 0
@@ -77,12 +77,12 @@ fn wdist(a : ArrayView[Tok], b : ArrayView[Tok]) -> Int {
 /// Line similarity in permille: `1000 * (mass - dist) / mass` over both
 /// sides' weighted mass. Zero-mass lines (empty or filler-only) carry no
 /// evidence either way and pair only when textually identical.
-pub fn similarity(a : String, b : String) -> Int {
+pub fn similarity(a : String, b : String) -> Int32 {
   sim_toks(tokenize_line(a), tokenize_line(b))
 }
 
 ///|
-fn sim_toks(a : ArrayView[Tok], b : ArrayView[Tok]) -> Int {
+fn sim_toks(a : ArrayView[Tok], b : ArrayView[Tok]) -> Int32 {
   let m = tok_mass(a) + tok_mass(b)
   if m == 0 {
     if a.length() != b.length() {
@@ -100,7 +100,7 @@ fn sim_toks(a : ArrayView[Tok], b : ArrayView[Tok]) -> Int {
 
 ///|
 /// Pairing threshold in permille.
-const THETA : Int = 400
+const THETA : Int32 = 400
 
 ///|
 /// Monotone alignment of a replacement block, maximizing the total positive
@@ -110,7 +110,7 @@ const THETA : Int = 400
 fn align(
   olds : Array[Array[Tok]],
   news : Array[Array[Tok]],
-) -> Array[(Int?, Int?)] {
+) -> Array[(Int32?, Int32?)] {
   let m = olds.length()
   let n = news.length()
   let dp = Array::makei(m + 1, _ => Array::make(n + 1, 0))
@@ -136,7 +136,7 @@ fn align(
       bp[i][j] = way
     }
   }
-  let out : Array[(Int?, Int?)] = []
+  let out : Array[(Int32?, Int32?)] = []
   let mut i = m
   let mut j = n
   while i > 0 || j > 0 {

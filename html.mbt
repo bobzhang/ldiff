@@ -153,7 +153,7 @@ fn split_replacement(
 pub fn side_by_side_html(
   old~ : ArrayView[String],
   new~ : ArrayView[String],
-  context? : Int = 3,
+  context~ : Int32 = 3,
 ) -> String {
   let buf = StringBuilder()
   buf <+ "<table class=\"split\">\n"
@@ -238,7 +238,7 @@ pub fn html_page(title~ : String, body : String) -> String {
 pub fn unified_html(
   old~ : ArrayView[String],
   new~ : ArrayView[String],
-  context? : Int = 3,
+  context~ : Int32 = 3,
 ) -> String {
   let buf = StringBuilder()
   fn line(cls : String, prefix : String, body : String) {
