@@ -1,6 +1,6 @@
 name = "bobzhang/ldiff"
 
-version = "0.1.4"
+version = "0.1.5"
 
 import {
   "moonbitlang/lexer@0.4.4",
