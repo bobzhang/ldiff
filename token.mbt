@@ -69,7 +69,7 @@ pub fn weight(k : TokKind) -> Int32 {
 /// and comment spacing are weightless `Filler` — shared boilerplate must not
 /// make unrelated comments look similar.
 fn push_comment_tokens(toks : Array[Tok], body : String) -> Unit {
-  let scanner = @lexbuf.StringScanner::{ data: body.view(), cursor: 0, }
+  let scanner = @lexbuf.StringScanner::{ data: body[:], cursor: 0, }
   while scanner.cursor < scanner.data.length() {
     lexscan scanner with longest {
       re"^//+" as t => toks.push({ kind: Filler, text: t.to_owned(), })
@@ -141,17 +141,14 @@ pub fn tokenize_line(line : String) -> Array[Tok] {
       continue
     }
     if sp.cnum > prev_end {
-      toks.push({
-        kind: Space,
-        text: line.view(start_offset=prev_end, end_offset=sp.cnum).to_owned(),
-      })
+      toks.push({ kind: Space, text: line[prev_end:sp.cnum].to_owned(), })
     }
-    let text = line.view(start_offset=sp.cnum, end_offset=ep.cnum).to_owned()
+    let text = line[sp.cnum:ep.cnum].to_owned()
     match tok {
       COMMENT(_) =>
         if text is ['/', '/', '/', '|', ..] {
           toks.push({ kind: Marker, text: "///|", })
-          push_comment_tokens(toks, text.view(start_offset=4).to_owned())
+          push_comment_tokens(toks, text[4:].to_owned())
         } else {
           push_comment_tokens(toks, text)
         }
@@ -160,10 +157,7 @@ pub fn tokenize_line(line : String) -> Array[Tok] {
     prev_end = ep.cnum
   }
   if prev_end < line.length() {
-    toks.push({
-      kind: Space,
-      text: line.view(start_offset=prev_end).to_owned(),
-    })
+    toks.push({ kind: Space, text: line[prev_end:].to_owned(), })
   }
   toks
 }
