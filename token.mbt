@@ -70,7 +70,7 @@ pub fn weight(k : TokKind) -> Int32 {
 /// and comment spacing are weightless `Filler` — shared boilerplate must not
 /// make unrelated comments look similar.
 fn push_comment_tokens(toks : Array[Tok], body : String) -> Unit {
-  let scanner = @lexbuf.StringScanner::{ data: body[:], cursor: 0, }
+  let scanner = @lexbuf.StringScanner(body[:])
   while scanner.cursor < scanner.data.length() {
     lexscan scanner with longest {
       re"^//+" as t => toks.push({ kind: Filler, text: t.to_owned(), })
